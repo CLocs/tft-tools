@@ -101,10 +101,14 @@ def hepta_name_from_date(date: datetime) -> str:
 
 def convert_roam_journal_to_hepta(dir_roam_export: str) -> None:
     j_files = get_list_of_journal_files(dir_roam_export)
+    print(f"Found {len(j_files)} journal files.")
     out_dir_path = create_output_dir(dir_roam_export)
+    print(f"Created output directory: {out_dir_path}")
     df = setup_df_and_extract_dates(j_files, dir_roam_export)
+    print("Copying files and renaming...")
     copy_journal_files(df, out_dir_path)
     rename_roam_to_hepta_format(df, out_dir_path)
+    print("Boom. Journal files are converted. See output directory.")
 
 
 def parse_args():
