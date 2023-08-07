@@ -3,6 +3,7 @@ import argparse
 
 def convert_roam_journal_to_hepta(dir_roam_export: str) -> None:
     # Get list of journal files
+    billy = 1
     # Create output directory
     # Copy Roam journal files to output directory
     # Rename Roam journal files to Heptabase file format
