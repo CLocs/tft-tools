@@ -10,7 +10,8 @@ class TestConvertJournal(TestCase):
     def setUp(self) -> None:
         self.test_base_path = os.path.abspath(os.path.dirname(__file__))
         self.journal_dir = os.path.join(self.test_base_path, 'roam-journal')
-        self.out_dir = os.path.join(self.test_base_path, 'roam-journal-convert')
+        self.out_dir = os.path.join(self.test_base_path,
+                                    'roam-journal-converted')
 
     def tearDown(self) -> None:
         if os.path.exists(self.out_dir):

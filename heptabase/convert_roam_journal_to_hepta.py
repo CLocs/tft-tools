@@ -2,10 +2,10 @@ import argparse
 import datetime
 import os
 import re
-import pandas as pd
 import shutil
 from typing import Optional
 
+import pandas as pd
 
 MONTH_NUMBER_DICT = {
     "January": 1,
@@ -57,13 +57,14 @@ def convert_roam_journal_to_hepta(dir_roam_export: str) -> None:
     parent_path, dir_name = os.path.split(dir_roam_export)
     out_dir_name = dir_name + '-converted'
     out_dir_path = os.path.join(parent_path, out_dir_name)
-    # if os.path.exists(out_dir_path):
-    #     print(f"Warning: converted files already exist. "
-    #           f"Please delete dir: {out_dir_path}. Then re-run.")
-    #     exit(0)
-    # os.makedirs(out_dir_path)
+    if os.path.exists(out_dir_path):
+        # print(f"Warning: converted files already exist. "
+        #       f"Please delete dir: {out_dir_path}. Then re-run.")
+        # exit(0)
+        shutil.rmtree(out_dir_path)
+    os.makedirs(out_dir_path)
 
-    # Copy Roam journal files to output directory
+    # Setup dataframe
     df = pd.DataFrame({'roam_filename': j_files})
     df['roam_filepath'] = df['roam_filename'].apply(
         lambda f: os.path.join(dir_roam_export, f))
@@ -72,10 +73,20 @@ def convert_roam_journal_to_hepta(dir_roam_export: str) -> None:
     df['datetime'] = df['roam_filename'].apply(extract_date_time)
     df['hepta_filename'] = df['datetime'].apply(hepta_name_from_date)
 
-    # Rename Roam journal files to Heptabase file format
-    billy = 1
+    # Copy journal files from Roam dir to out dir
+    df['roam_dest_filepath'] = df['roam_filename'].apply(
+        lambda f: os.path.join(out_dir_path, f))
+    for i, row in df.iterrows():
+        if row['datetime']:
+            print(f"Copying: {row['roam_filepath']} to {row['roam_dest_filepath']}")
+            shutil.copyfile(row['roam_filepath'], row['roam_dest_filepath'])
 
-    pass
+    # Rename Roam journal files to Heptabase file format
+    df['hepta_filepath'] = df['hepta_filename'].apply(
+        lambda f: os.path.join(out_dir_path, f))
+    for i, row in df.iterrows():
+        if row['datetime']:
+            os.rename(row['roam_dest_filepath'], row['hepta_filepath'])
 
 
 def parse_args():
