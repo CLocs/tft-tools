@@ -34,17 +34,25 @@ def get_list_of_journal_files(dir_roam_export):
     return j_files
 
 
-def create_output_dir(dir_roam_export) -> str:
-    # Create output directory
-    parent_path, dir_name = os.path.split(dir_roam_export)
-    out_dir_name = dir_name + '-converted'
-    out_dir_path = os.path.join(parent_path, out_dir_name)
-    if os.path.exists(out_dir_path):
-        # print(f"Warning: converted files already exist. "
-        #       f"Please delete dir: {out_dir_path}. Then re-run.")
-        # exit(0)
-        shutil.rmtree(out_dir_path)
-    os.makedirs(out_dir_path)
+def create_output_dir(dir_roam_export: str, in_place: bool) -> str:
+    """
+    If in_place is True, then out_dir = dir_roam_export
+    Else (in_place is False, then create XYZ-converted directory
+    adjacent to dir_roam_export
+    """
+    if in_place:
+        out_dir_path = dir_roam_export
+    else:
+        # Create output directory
+        parent_path, dir_name = os.path.split(dir_roam_export)
+        out_dir_name = dir_name + '-converted'
+        out_dir_path = os.path.join(parent_path, out_dir_name)
+        if os.path.exists(out_dir_path):
+            # print(f"Warning: converted files already exist. "
+            #       f"Please delete dir: {out_dir_path}. Then re-run.")
+            # exit(0)
+            shutil.rmtree(out_dir_path)
+        os.makedirs(out_dir_path)
     return out_dir_path
 
 
@@ -99,15 +107,28 @@ def hepta_name_from_date(date: datetime) -> str:
     return hepta_format
 
 
-def convert_roam_journal_to_hepta(dir_roam_export: str) -> None:
+def convert_roam_journal_to_hepta(
+        dir_roam_export: str,
+        in_place: bool
+) -> None:
     j_files = get_list_of_journal_files(dir_roam_export)
     print(f"Found {len(j_files)} journal files.")
-    out_dir_path = create_output_dir(dir_roam_export)
+
+    out_dir_path = create_output_dir(dir_roam_export, in_place)
     print(f"Created output directory: {out_dir_path}")
+
+    print("Extracting dates from filenames...")
     df = setup_df_and_extract_dates(j_files, dir_roam_export)
-    print("Copying files and renaming...")
-    copy_journal_files(df, out_dir_path)
+
+    if in_place:
+        df['roam_dest_filepath'] = df['roam_filepath']
+    else:
+        print("Copying files...")
+        copy_journal_files(df, out_dir_path)
+
+    print("Renaming files...")
     rename_roam_to_hepta_format(df, out_dir_path)
+
     print("Boom. Journal files are converted. See output directory.")
 
 
@@ -117,9 +138,16 @@ def parse_args():
                         help='Path to exported Roam MD files, unzipped',
                         required=True,
                         type=str)
+    parser.add_argument("--in_place", "-p",
+                        help="True: convert in-place (default),"
+                             " else make a separate directory",
+                        required=False,
+                        default=True,
+                        type=bool)
     return vars(parser.parse_args())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     args = parse_args()
-    convert_roam_journal_to_hepta(args['roam_export_dir'])
+    convert_roam_journal_to_hepta(args["roam_export_dir"],
+                                  args["in_place"])
