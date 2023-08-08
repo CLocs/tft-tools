@@ -9,7 +9,10 @@
 2. Extract ZIP file
    * On your machine, find the ZIP file and extract it.
 3. Run convert script
-   * python convert_roam_journal_to_hepta.py -r "full-path-to-extracted-folder-above" 
-4. Import into Heptabase
-   * Import -> Markdown
-   * Select all MD journal files to import
+   * `python convert_roam_journal_to_hepta.py -r "full-path-to-extracted-folder-above"` 
+   * Note: if you want to extract just the journal files, add run argument `-p 0`
+   * After running the script, verify that your journal files are named with format `YYYY-MM-DD.md`. 
+4. Zip your MD files
+5. Import into Heptabase
+   * Import -> Obsidian ZIP
+   * Select ZIP-file created above
